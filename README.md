@@ -14,6 +14,9 @@ To use vist: http://localhost:8080/
 
 To use vist:  https://YOUR-PROJECT-ID.appspot.com
 
+### Browsing local datastore
+http://localhost:8080/_ah/admin
+
 ## Testing
 
 `mvn verify`

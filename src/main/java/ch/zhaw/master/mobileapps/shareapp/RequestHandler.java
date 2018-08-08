@@ -17,9 +17,13 @@
 package ch.zhaw.master.mobileapps.shareapp;
 
 import java.io.File;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -29,27 +33,48 @@ import com.google.appengine.api.datastore.Entity;
 
 @RestController
 public class RequestHandler {
-	
-	private Item item;
-	
-	public RequestHandler() {
-		item = new Item("Thomas", "Bohrmaschine", "bohrt und so");
-	}
-	
-  @GetMapping("/")
-  public Item hello() {
-    return item;
+  
+  @PostMapping("/items/add")
+  public void saveItem(HttpServletResponse response, @RequestBody Item input) {
+	  Entity entity = new Entity(Item.OBJECT_TYPE);
+	  setItemProperties(input, entity);
+	  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	  datastore.put(entity);
+	  response.setStatus(HttpServletResponse.SC_CREATED);
   }
   
-  @GetMapping("/item/add")
-  public void save() {
-	  Entity item = new Entity("Item");
-	  item.setProperty("owner", "Thomas");
-	  item.setProperty("title", "Ding");
-	  item.setProperty("description", "cooles Ding");
-	  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-	  datastore.put(item);
+  
 
-	  
-  }
+private void setItemProperties(Item input, Entity item) {
+	  item.setProperty(Item.FIELDNAME_CATEGORY, input.getCategory());
+	  item.setProperty(Item.FIELDNAME_CITY, input.getCity());
+	  item.setProperty(Item.FIELDNAME_DESCRIPTION, input.getDescription());
+	  item.setProperty(Item.FIELDNAME_ITEM_ID, UUID.randomUUID().toString());
+	  item.setProperty(Item.FIELDNAME_OWNER_ID, input.getOwnerId());
+	  item.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
+	  item.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
+	  item.setProperty(Item.FIELDNAME_ZIPCODE, input.getZipCode());
+}
+  
+  /*
+   * 
+
+    @RestController
+    public class CustomerController {
+        //@Autowired CustomerService customerService;
+
+        @RequestMapping(path="/customers", method= RequestMethod.POST)
+        @ResponseStatus(HttpStatus.CREATED)
+        public Customer postCustomer(@RequestBody Customer customer){
+            //return customerService.createCustomer(customer);
+        }
+    }
+    
+    public RestModel create(@RequestBody String data, HttpServletResponse response) {
+    // code ommitted..
+    response.setStatus(HttpServletResponse.SC_ACCEPTED);
+}
+
+
+   */
 }
