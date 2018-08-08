@@ -2,6 +2,8 @@ package ch.zhaw.master.mobileapps.shareapp;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -20,6 +22,16 @@ public class JsonTest {
 		System.out.println(stringItem);
 		
 		objectMapper.readValue(stringItem.toString(), Item.class);
+		
+		List<Item> itemlist = new ArrayList<>();
+		itemlist.add(item);
+		itemlist.add(item);
+		
+		stringItem.getBuffer().delete(0, stringItem.getBuffer().length());
+		objectMapper.writeValue(stringItem, itemlist);
+		System.out.println(stringItem);
+		
+		
 		
 	}
 }
