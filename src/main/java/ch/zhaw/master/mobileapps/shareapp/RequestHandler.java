@@ -21,10 +21,15 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -35,21 +40,27 @@ import com.google.appengine.api.datastore.Entity;
 public class RequestHandler {
   
   @PostMapping("/items/add")
-  public void saveItem(HttpServletResponse response, @RequestBody Item input) {
+  public ResponseEntity<?> saveItem(HttpServletResponse response, @RequestBody Item input, UriComponentsBuilder b) {
 	  Entity entity = new Entity(Item.OBJECT_TYPE);
-	  setItemProperties(input, entity);
+	  String uuid = UUID.randomUUID().toString();
+	  setItemProperties(input, entity, uuid);
 	  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 	  datastore.put(entity);
-	  response.setStatus(HttpServletResponse.SC_CREATED);
+	  
+	  UriComponents uriComponents = b.path("/items/{id}").buildAndExpand(uuid);
+	  HttpHeaders headers = new HttpHeaders();
+	  headers.setLocation(uriComponents.toUri());
+	  return new ResponseEntity<Void>(headers, HttpStatus.CREATED);	  
   }
   
   
+  
 
-private void setItemProperties(Item input, Entity item) {
+private void setItemProperties(Item input, Entity item, String uuid) {
 	  item.setProperty(Item.FIELDNAME_CATEGORY, input.getCategory());
 	  item.setProperty(Item.FIELDNAME_CITY, input.getCity());
 	  item.setProperty(Item.FIELDNAME_DESCRIPTION, input.getDescription());
-	  item.setProperty(Item.FIELDNAME_ITEM_ID, UUID.randomUUID().toString());
+	  item.setProperty(Item.FIELDNAME_ITEM_ID, uuid);
 	  item.setProperty(Item.FIELDNAME_OWNER_ID, input.getOwnerId());
 	  item.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
 	  item.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
