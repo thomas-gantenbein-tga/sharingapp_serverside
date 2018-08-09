@@ -54,9 +54,9 @@ curl --header "Content-Type: application/json" \
 ```
   
 ## Search
-https://fabled-coder-210208.appspot.com/items?userId=tgantenbein&description=super
-https://fabled-coder-210208.appspot.com/items?description=superduper
-https://fabled-coder-210208.appspot.com/items/searchByOwner/mherzog
+* https://fabled-coder-210208.appspot.com/items?userId=tgantenbein&description=super
+* https://fabled-coder-210208.appspot.com/items?description=superduper
+* https://fabled-coder-210208.appspot.com/items/searchByOwner/mherzog
 
 
 ## Testing
