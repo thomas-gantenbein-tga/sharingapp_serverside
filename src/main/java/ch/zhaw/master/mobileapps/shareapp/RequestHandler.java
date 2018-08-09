@@ -37,6 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
@@ -74,6 +75,23 @@ public class RequestHandler {
 		}
 		setResponseStatus(response, itemList);
 		return itemList;
+	}
+	
+	@PostMapping("/items/delete/{itemId}")
+	public void deleteItemById(@PathVariable("itemId") String itemId, HttpServletResponse response) {
+		Filter ownerIdFilter = new FilterPredicate(Item.FIELDNAME_ITEM_ID, FilterOperator.EQUAL, itemId);
+
+		Query q = new Query(Item.OBJECT_TYPE).setFilter(ownerIdFilter);
+
+		PreparedQuery pq = datastore.prepare(q);
+		Iterable<Entity> resultSet = pq.asIterable();
+		
+
+		for (Entity entity : resultSet) {
+			Key key = entity.getKey();
+			datastore.delete(key);
+		}
+		response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
 
 	private void setResponseStatus(HttpServletResponse response, List<Item> itemList) {
