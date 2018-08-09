@@ -45,104 +45,122 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 
 @RestController
 public class RequestHandler {
+	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	@PostMapping("/items/add")
-	public ResponseEntity<?> saveItem(HttpServletResponse response, @RequestBody Item input, UriComponentsBuilder b) {
-		Entity entity = new Entity(Item.OBJECT_TYPE);
-		setItemProperties(input, entity);
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	public ResponseEntity<?> saveItem(@RequestBody Item item, UriComponentsBuilder b) {
+		Entity entity = convertItemToEntity(item);
 		datastore.put(entity);
 
-		UriComponents uriComponents = b.path("/items/{id}").buildAndExpand(input.getItemId().toString());
+		UriComponents uriComponents = b.path("/items/{id}").buildAndExpand(item.getItemId().toString());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(uriComponents.toUri());
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/items/searchByOwner/{ownerId}")
-	public List<Item> searchItemByOwnerId(@PathVariable("ownerId") String ownerId) {
+	public List<Item> searchItemByOwnerId(@PathVariable("ownerId") String ownerId, HttpServletResponse response) {
 		Filter ownerIdFilter = new FilterPredicate(Item.FIELDNAME_OWNER_ID, FilterOperator.EQUAL, ownerId);
 
 		Query q = new Query(Item.OBJECT_TYPE).setFilter(ownerIdFilter);
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 		PreparedQuery pq = datastore.prepare(q);
 		Iterable<Entity> resultSet = pq.asIterable();
 		List<Item> itemList = new ArrayList<>();
 
 		for (Entity entity : resultSet) {
-			String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
-			String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
-			String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
-			String entityCategory = (String) entity.getProperty(Item.FIELDNAME_CATEGORY);
-			String entityDescription = (String) entity.getProperty(Item.FIELDNAME_DESCRIPTION);
-			String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
-			String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
-			String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
-
-			Item item = new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
-					entityDescription, entityCity, entityZipCode, entityTelephone);
+			Item item = convertEntityToItem(entity);	
 			itemList.add(item);
 		}
+		setResponseStatus(response, itemList);
 		return itemList;
+	}
+
+	private void setResponseStatus(HttpServletResponse response, List<Item> itemList) {
+		if (itemList.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		} else {
+			response.setStatus(HttpServletResponse.SC_FOUND);
+		}
+	}
+
+	private Item convertEntityToItem(Entity entity) {
+		String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
+		String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
+		String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
+		String entityCategory = (String) entity.getProperty(Item.FIELDNAME_CATEGORY);
+		String entityDescription = (String) entity.getProperty(Item.FIELDNAME_DESCRIPTION);
+		String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
+		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
+		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
+
+		return new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
+				entityDescription, entityCity, entityZipCode, entityTelephone);
 	}
 
 	@GetMapping("/items")
-	public List<Item> searchItemByFields(@RequestParam(name = "ownerId", required = false) String ownerId,
-			@RequestParam(name = "description", required = false) String description) {
+	public List<Item> searchItemByFields(HttpServletResponse response,
+			@RequestParam(name = Item.FIELDNAME_OWNER_ID, required = false) String ownerId,
+			@RequestParam(name = Item.FIELDNAME_ITEM_ID, required = false) String itemId,
+			@RequestParam(name = Item.FIELDNAME_TITLE, required = false) String title,
+			@RequestParam(name = Item.FIELDNAME_CATEGORY, required = false) String category,
+			@RequestParam(name = Item.FIELDNAME_DESCRIPTION, required = false) String description,
+			@RequestParam(name = Item.FIELDNAME_CATEGORY, required = false) String city,
+			@RequestParam(name = Item.FIELDNAME_ZIPCODE, required = false) String zipcode,
+			@RequestParam(name = Item.FIELDNAME_TELEPHONE_NUMBER, required = false) String telephone) {
 		Query q = new Query(Item.OBJECT_TYPE);
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
 		Iterable<Entity> resultSet = pq.asIterable();
 		List<Item> itemList = new ArrayList<>();
 
 		for (Entity entity : resultSet) {
-			String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
-			String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
-			String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
-			String entityCategory = (String) entity.getProperty(Item.FIELDNAME_CATEGORY);
-			String entityDescription = (String) entity.getProperty(Item.FIELDNAME_DESCRIPTION);
-			String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
-			String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
-			String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
-
-			if ((ownerId == null || entityOwnerId.equals(ownerId))
-					&& (description == null || entityDescription.contains(description))) {
-				Item item = new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
-						entityDescription, entityCity, entityZipCode, entityTelephone);
+			boolean entityMatches = checkAgainstCriteria(entity, ownerId, itemId, title, category, description,
+					city, zipcode, telephone);
+			
+			if (entityMatches) {
+				Item item = convertEntityToItem(entity);
 				itemList.add(item);
 			}
 		}
+		setResponseStatus(response, itemList);
 		return itemList;
 	}
 
-	private void setItemProperties(Item input, Entity item) {
-		item.setProperty(Item.FIELDNAME_CATEGORY, input.getCategory());
-		item.setProperty(Item.FIELDNAME_CITY, input.getCity());
-		item.setProperty(Item.FIELDNAME_DESCRIPTION, input.getDescription());
-		item.setProperty(Item.FIELDNAME_ITEM_ID, input.getItemId().toString());
-		item.setProperty(Item.FIELDNAME_OWNER_ID, input.getOwnerId());
-		item.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
-		item.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
-		item.setProperty(Item.FIELDNAME_ZIPCODE, input.getZipCode());
+	private boolean checkAgainstCriteria(Entity entity, String ownerId, String itemId, String title, 
+			String category, String description, String city, String zipcode, String telephone) {
+		String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
+		String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
+		String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
+		String entityCategory = (String) entity.getProperty(Item.FIELDNAME_CATEGORY);
+		String entityDescription = (String) entity.getProperty(Item.FIELDNAME_DESCRIPTION);
+		String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
+		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
+		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
+		
+		if ((ownerId == null || entityOwnerId.equals(ownerId))
+				&& (description == null || entityDescription.contains(description))
+				&& (title == null || entityTitle.contains(title))
+				&& (itemId == null || entityUuid.equals(itemId))
+				&& (category == null || entityCategory.equals(category))
+				&& (city == null || entityCity.contains(city))
+				&& (zipcode == null || entityZipCode.contains(zipcode))
+				&& (telephone == null || entityTelephone.equals(telephone))) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	/*
-	 * 
-	 * 
-	 * @RestController public class CustomerController { //@Autowired
-	 * CustomerService customerService;
-	 * 
-	 * @RequestMapping(path="/customers", method= RequestMethod.POST)
-	 * 
-	 * @ResponseStatus(HttpStatus.CREATED) public Customer
-	 * postCustomer(@RequestBody Customer customer){ //return
-	 * customerService.createCustomer(customer); } }
-	 * 
-	 * public RestModel create(@RequestBody String data, HttpServletResponse
-	 * response) { // code ommitted..
-	 * response.setStatus(HttpServletResponse.SC_ACCEPTED); }
-	 * 
-	 * 
-	 */
+	private Entity convertItemToEntity(Item input) {
+		Entity entity = new Entity(Item.OBJECT_TYPE);
+		entity.setProperty(Item.FIELDNAME_CATEGORY, input.getCategory());
+		entity.setProperty(Item.FIELDNAME_CITY, input.getCity());
+		entity.setProperty(Item.FIELDNAME_DESCRIPTION, input.getDescription());
+		entity.setProperty(Item.FIELDNAME_ITEM_ID, input.getItemId().toString());
+		entity.setProperty(Item.FIELDNAME_OWNER_ID, input.getOwnerId());
+		entity.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
+		entity.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
+		entity.setProperty(Item.FIELDNAME_ZIPCODE, input.getZipCode());
+		return entity;
+	}
 }
