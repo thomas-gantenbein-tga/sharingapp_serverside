@@ -98,7 +98,7 @@ public class RequestHandler {
 		if (itemList.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		} else {
-			response.setStatus(HttpServletResponse.SC_FOUND);
+			response.setStatus(HttpServletResponse.SC_OK);
 		}
 	}
 
