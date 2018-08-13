@@ -174,7 +174,7 @@ public class RequestHandler {
 		entity.setProperty(Item.FIELDNAME_CATEGORY, input.getCategory());
 		entity.setProperty(Item.FIELDNAME_CITY, input.getCity());
 		entity.setProperty(Item.FIELDNAME_DESCRIPTION, input.getDescription());
-		entity.setProperty(Item.FIELDNAME_ITEM_ID, input.getItemId().toString());
+		entity.setProperty(Item.FIELDNAME_ITEM_ID, UUID.randomUUID().toString());
 		entity.setProperty(Item.FIELDNAME_OWNER_ID, input.getOwnerId());
 		entity.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
 		entity.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
