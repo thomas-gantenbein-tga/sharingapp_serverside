@@ -58,7 +58,7 @@ public class Item {
 		return ownerId;
 	}
 
-	@JsonIgnore
+	
 	public UUID getItemId() {
 		return itemId;
 	}
