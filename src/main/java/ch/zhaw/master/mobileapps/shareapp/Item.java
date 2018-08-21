@@ -16,6 +16,7 @@ public class Item {
 	private final String city;
 	private final String zipCode;
 	private final String telephoneNumber;
+	private final String address;
 
 	final static String OBJECT_TYPE = "Item";
 	final static String FIELDNAME_OWNER_ID = "ownerId";
@@ -26,12 +27,13 @@ public class Item {
 	final static String FIELDNAME_CITY = "city";
 	final static String FIELDNAME_ZIPCODE = "zipCode";
 	final static String FIELDNAME_TELEPHONE_NUMBER = "telephoneNumber";
+	final static String FIELDNAME_ADDRESS = "address";
 
 	@JsonCreator
 	public Item(@JsonProperty(FIELDNAME_OWNER_ID) String ownerId, @JsonProperty(FIELDNAME_TITLE) String title,
 			@JsonProperty(FIELDNAME_CATEGORY) String category, @JsonProperty(FIELDNAME_DESCRIPTION) String description,
 			@JsonProperty(FIELDNAME_CITY) String city, @JsonProperty(FIELDNAME_ZIPCODE) String zipCode,
-			@JsonProperty(FIELDNAME_TELEPHONE_NUMBER) String telephoneNumber) {
+			@JsonProperty(FIELDNAME_TELEPHONE_NUMBER) String telephoneNumber, @JsonProperty(FIELDNAME_ADDRESS) String address) {
 		this.ownerId = ownerId;
 		this.itemId = UUID.randomUUID();
 		this.title = title;
@@ -40,10 +42,11 @@ public class Item {
 		this.city = city;
 		this.zipCode = zipCode;
 		this.telephoneNumber = telephoneNumber;
+		this.address = address;
 	}
 
 	public Item(String ownerId, UUID itemId, String title, String category, String description, String city,
-			String zipCode, String telephoneNumber) {
+			String zipCode, String telephoneNumber, String address) {
 		this.ownerId = ownerId;
 		this.itemId = itemId;
 		this.title = title;
@@ -52,6 +55,7 @@ public class Item {
 		this.city = city;
 		this.zipCode = zipCode;
 		this.telephoneNumber = telephoneNumber;
+		this.address = address;
 	}
 
 	public String getOwnerId() {
@@ -85,6 +89,10 @@ public class Item {
 
 	public String getTelephoneNumber() {
 		return telephoneNumber;
+	}
+	
+	public String getAddress() {
+		return address;
 	}
 
 }

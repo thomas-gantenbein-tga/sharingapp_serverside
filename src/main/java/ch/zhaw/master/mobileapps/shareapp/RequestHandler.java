@@ -79,9 +79,9 @@ public class RequestHandler {
 	
 	@PostMapping("/items/delete/{itemId}")
 	public void deleteItemById(@PathVariable("itemId") String itemId, HttpServletResponse response) {
-		Filter ownerIdFilter = new FilterPredicate(Item.FIELDNAME_ITEM_ID, FilterOperator.EQUAL, itemId);
+		Filter itemIdFilter = new FilterPredicate(Item.FIELDNAME_ITEM_ID, FilterOperator.EQUAL, itemId);
 
-		Query q = new Query(Item.OBJECT_TYPE).setFilter(ownerIdFilter);
+		Query q = new Query(Item.OBJECT_TYPE).setFilter(itemIdFilter);
 
 		PreparedQuery pq = datastore.prepare(q);
 		Iterable<Entity> resultSet = pq.asIterable();
@@ -111,9 +111,10 @@ public class RequestHandler {
 		String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
 		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
 		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
+		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
 
 		return new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
-				entityDescription, entityCity, entityZipCode, entityTelephone);
+				entityDescription, entityCity, entityZipCode, entityTelephone, entityAddress);
 	}
 
 	@GetMapping("/items")
@@ -125,7 +126,8 @@ public class RequestHandler {
 			@RequestParam(name = Item.FIELDNAME_DESCRIPTION, required = false) String description,
 			@RequestParam(name = Item.FIELDNAME_CATEGORY, required = false) String city,
 			@RequestParam(name = Item.FIELDNAME_ZIPCODE, required = false) String zipcode,
-			@RequestParam(name = Item.FIELDNAME_TELEPHONE_NUMBER, required = false) String telephone) {
+			@RequestParam(name = Item.FIELDNAME_TELEPHONE_NUMBER, required = false) String telephone,
+			@RequestParam(name = Item.FIELDNAME_ADDRESS, required = false) String address) {
 		Query q = new Query(Item.OBJECT_TYPE);
 		PreparedQuery pq = datastore.prepare(q);
 		Iterable<Entity> resultSet = pq.asIterable();
@@ -133,7 +135,7 @@ public class RequestHandler {
 
 		for (Entity entity : resultSet) {
 			boolean entityMatches = checkAgainstCriteria(entity, ownerId, itemId, title, category, description,
-					city, zipcode, telephone);
+					city, zipcode, telephone, address);
 			
 			if (entityMatches) {
 				Item item = convertEntityToItem(entity);
@@ -145,7 +147,7 @@ public class RequestHandler {
 	}
 
 	private boolean checkAgainstCriteria(Entity entity, String ownerId, String itemId, String title, 
-			String category, String description, String city, String zipcode, String telephone) {
+			String category, String description, String city, String zipcode, String telephone, String address) {
 		String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
 		String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
 		String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
@@ -154,6 +156,7 @@ public class RequestHandler {
 		String entityCity = (String) entity.getProperty(Item.FIELDNAME_CITY);
 		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
 		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
+		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
 		
 		if ((ownerId == null || entityOwnerId.equals(ownerId))
 				&& (description == null || entityDescription.contains(description))
@@ -162,7 +165,8 @@ public class RequestHandler {
 				&& (category == null || entityCategory.equals(category))
 				&& (city == null || entityCity.contains(city))
 				&& (zipcode == null || entityZipCode.contains(zipcode))
-				&& (telephone == null || entityTelephone.equals(telephone))) {
+				&& (telephone == null || entityTelephone.equals(telephone))
+				&& (address == null || entityAddress.equals(address))) {
 			return true;
 		} else {
 			return false;
@@ -179,6 +183,7 @@ public class RequestHandler {
 		entity.setProperty(Item.FIELDNAME_TELEPHONE_NUMBER, input.getTelephoneNumber());
 		entity.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
 		entity.setProperty(Item.FIELDNAME_ZIPCODE, input.getZipCode());
+		entity.setProperty(Item.FIELDNAME_ADDRESS, input.getAddress());
 		return entity;
 	}
 }
