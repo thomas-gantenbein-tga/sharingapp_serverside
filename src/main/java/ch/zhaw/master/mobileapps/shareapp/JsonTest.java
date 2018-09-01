@@ -16,7 +16,7 @@ public class JsonTest {
 		//create ObjectMapper instance
 		ObjectMapper objectMapper = new ObjectMapper();		
 		
-		Item item = new Item("tgantenbein", UUID.randomUUID(), "Super Teil", "Haushalt", "Ein wirklich super Teil", "Winterthur", "8408", "111", "Wässerwiesenstrasse 67a");
+		Item item = new Item("tgantenbein", UUID.randomUUID(), "Super Teil", "Haushalt", "Ein wirklich super Teil", "Winterthur", "8408", "111", "Wässerwiesenstrasse 67a", "lkj");
 		StringWriter stringItem = new StringWriter();
 		objectMapper.writeValue(stringItem, item);
 		System.out.println(stringItem);
