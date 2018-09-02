@@ -43,6 +43,9 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Text;
+
+import ch.qos.logback.core.spi.PropertyContainer;
 
 @RestController
 public class RequestHandler {
@@ -112,9 +115,10 @@ public class RequestHandler {
 		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
 		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
 		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
+		String entityPicture = ((Text) entity.getProperty(Item.FIELDNAME_PICTURE)).getValue();
 
 		return new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
-				entityDescription, entityCity, entityZipCode, entityTelephone, entityAddress);
+				entityDescription, entityCity, entityZipCode, entityTelephone, entityAddress, entityPicture);
 	}
 
 	@GetMapping("/items")
@@ -184,6 +188,8 @@ public class RequestHandler {
 		entity.setProperty(Item.FIELDNAME_TITLE, input.getTitle());
 		entity.setProperty(Item.FIELDNAME_ZIPCODE, input.getZipCode());
 		entity.setProperty(Item.FIELDNAME_ADDRESS, input.getAddress());
+		entity.setProperty(Item.FIELDNAME_PICTURE,  new Text(input.getPicture()));
+		
 		return entity;
 	}
 }
