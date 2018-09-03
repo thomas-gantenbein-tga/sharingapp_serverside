@@ -96,6 +96,30 @@ public class RequestHandler {
 		}
 		response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
+	
+	@GetMapping("/items/{itemId}/pictureonly")
+	public List<Item> getPictureOnly(@PathVariable("itemId") String itemId, HttpServletResponse response) {
+		Filter itemIdFilter = new FilterPredicate(Item.FIELDNAME_ITEM_ID, FilterOperator.EQUAL, itemId);
+
+		Query q = new Query(Item.OBJECT_TYPE).setFilter(itemIdFilter);
+
+		PreparedQuery pq = datastore.prepare(q);
+		Iterable<Entity> resultSet = pq.asIterable();
+		
+
+		List<Item> itemList = new ArrayList<Item>();
+		for (Entity entity : resultSet) {
+			Item item = createItemWithPictureOnly(entity);	
+			itemList.add(item);
+		}
+		setResponseStatus(response, itemList);
+		return itemList;
+	}
+
+	private Item createItemWithPictureOnly(Entity entity) {
+		String entityPicture = ((Text) entity.getProperty(Item.FIELDNAME_PICTURE)).getValue();
+		return new Item(null, null, null, null, null, null, null, null, null, entityPicture);
+	}
 
 	private void setResponseStatus(HttpServletResponse response, List<Item> itemList) {
 		if (itemList.isEmpty()) {
@@ -115,7 +139,7 @@ public class RequestHandler {
 		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
 		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
 		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
-		String entityPicture = ((Text) entity.getProperty(Item.FIELDNAME_PICTURE)).getValue();
+		String entityPicture = "";
 
 		return new Item(entityOwnerId, UUID.fromString(entityUuid), entityTitle, entityCategory,
 				entityDescription, entityCity, entityZipCode, entityTelephone, entityAddress, entityPicture);
