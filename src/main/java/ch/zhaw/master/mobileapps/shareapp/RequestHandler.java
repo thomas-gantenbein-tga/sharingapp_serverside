@@ -187,14 +187,14 @@ public class RequestHandler {
 		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
 
 		if ((ownerId == null || entityOwnerId.equals(ownerId))
-				&& (description == null || entityDescription.contains(description))
-				&& (title == null || entityTitle.contains(title))
-				&& (itemId == null || entityUuid.equals(itemId))
+				&& (description == null || entityDescription.toLowerCase().contains(description.toLowerCase()))
+				&& (title == null || entityTitle.toLowerCase().contains(title.toLowerCase()))
+				&& (itemId == null || entityUuid.toLowerCase().equals(itemId.toLowerCase()))
 				&& (category == null || entityCategory.equals(category))
-				&& (city == null || entityCity.contains(city))
+				&& (city == null || entityCity.toLowerCase().contains(city.toLowerCase()))
 				&& (zipcode == null || entityZipCode.contains(zipcode))
 				&& (telephone == null || entityTelephone.equals(telephone))
-				&& (address == null || entityAddress.equals(address))) {
+				&& (address == null || entityAddress.toLowerCase().equals(address.toLowerCase()))) {
 			return true;
 		} else {
 			return false;
