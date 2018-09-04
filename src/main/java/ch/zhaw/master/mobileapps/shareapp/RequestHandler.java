@@ -152,7 +152,7 @@ public class RequestHandler {
 			@RequestParam(name = Item.FIELDNAME_TITLE, required = false) String title,
 			@RequestParam(name = Item.FIELDNAME_CATEGORY, required = false) String category,
 			@RequestParam(name = Item.FIELDNAME_DESCRIPTION, required = false) String description,
-			@RequestParam(name = Item.FIELDNAME_CATEGORY, required = false) String city,
+			@RequestParam(name = Item.FIELDNAME_CITY, required = false) String city,
 			@RequestParam(name = Item.FIELDNAME_ZIPCODE, required = false) String zipcode,
 			@RequestParam(name = Item.FIELDNAME_TELEPHONE_NUMBER, required = false) String telephone,
 			@RequestParam(name = Item.FIELDNAME_ADDRESS, required = false) String address) {
@@ -164,7 +164,6 @@ public class RequestHandler {
 		for (Entity entity : resultSet) {
 			boolean entityMatches = checkAgainstCriteria(entity, ownerId, itemId, title, category, description,
 					city, zipcode, telephone, address);
-			
 			if (entityMatches) {
 				Item item = convertEntityToItem(entity);
 				itemList.add(item);
@@ -176,6 +175,7 @@ public class RequestHandler {
 
 	private boolean checkAgainstCriteria(Entity entity, String ownerId, String itemId, String title, 
 			String category, String description, String city, String zipcode, String telephone, String address) {
+		
 		String entityOwnerId = (String) entity.getProperty(Item.FIELDNAME_OWNER_ID);
 		String entityUuid = (String) entity.getProperty(Item.FIELDNAME_ITEM_ID);
 		String entityTitle = (String) entity.getProperty(Item.FIELDNAME_TITLE);
@@ -185,7 +185,7 @@ public class RequestHandler {
 		String entityZipCode = (String) entity.getProperty(Item.FIELDNAME_ZIPCODE);
 		String entityTelephone = (String) entity.getProperty(Item.FIELDNAME_TELEPHONE_NUMBER);
 		String entityAddress = (String) entity.getProperty(Item.FIELDNAME_ADDRESS);
-		
+
 		if ((ownerId == null || entityOwnerId.equals(ownerId))
 				&& (description == null || entityDescription.contains(description))
 				&& (title == null || entityTitle.contains(title))
