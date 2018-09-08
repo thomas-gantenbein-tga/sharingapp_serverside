@@ -1,65 +1,38 @@
-Sharing app server-side application
-============================
+# TeilHabe -- Serverseitige Anwendung
 
-## Maven
-### Running locally
+## Über dieses Projekt
+Dieses Projekt ist eine Springboot-Anwendung. Sie stellt einen
+einfachen REST-Service für die [TeilHabe-Client-Anwendung](https://github.com/thomas-gantenbein-tga/sharingapp_serverside) 
+zur Verfügung. Der Service wird als Google-Appengine-Anwendung deployt.
 
-`mvn appengine:run`
+Maven-Setup übernommen von einem [Google-Beispielprojekt](https://github.com/GoogleCloudPlatform/getting-started-java/tree/master/appengine-standard-java8/springboot-appengine-standard).
 
-To use vist: http://localhost:8080/
-
-### Deploying
-
-`mvn appengine:deploy`
-
-To use vist:  https://YOUR-PROJECT-ID.appspot.com
-
-## Browsing local datastore
-http://localhost:8080/_ah/admin
-
-## Adding an item via curl
-### Localhost
-```
-curl --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"ownerId":"tgantenbein","title":"Super Teil","category":"Haushalt","description":"Ein wirklich super Teil","city":"Winterthur","zipCode":"8408","telephoneNumber":"111"}' \
-  --verbose \
-  http://localhost:8080/items/add
-```
-
-### Server
-```
-curl --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"ownerId":"tgantenbein","title":"Super Teil","category":"Haushalt","description":"Ein wirklich super Teil","city":"Winterthur","zipCode":"8408","telephoneNumber":"111"}' \
-  --verbose \
-  https://fabled-coder-210208.appspot.com/items/add
-```
-
-```
-curl --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"ownerId":"mherzog","title":"Super Teil","category":"Haushalt","description":"Ein wirklich superduper Teil","city":"Frauenfeld","zipCode":"8500","telephoneNumber":"113"}' \
-  --verbose \
-  https://fabled-coder-210208.appspot.com/items/add
-```
-  
-## Deleting an item via curl
-```
-curl --header "Content-Type: application/json" \
-  --data '' \
-  --request POST \
-  --verbose \
-  http://localhost:8080/items/delete/3081ef07-e549-4c70-9f1d-98bd30a5b354
-```
-  
-## Search
-* https://fabled-coder-210208.appspot.com/items?userId=tgantenbein&description=super
-* https://fabled-coder-210208.appspot.com/items?description=superduper
-* https://fabled-coder-210208.appspot.com/items/searchByOwner/mherzog
+## Nutzung
+Die Anwendung ist bereits deployt und online. Um alle geteilten Gegenstände 
+als JSON abzurufen, kann zum Beispiel die folgende URL aufgerufen werden:
+http://fabled-coder-210208.appspot.com/items.
 
 
-## Testing
+## Lokale Ausführung
+Um den Rest-Service lokal (localhost:8080) laufen zu lassen:
 
-`mvn verify`
+1. Anleitung von Google befolgen: [Apache Maven und das (Cloud SDK-basierte) App Engine-Plug-in verwenden](https://cloud.google.com/appengine/docs/standard/java/tools/using-maven).
+2. Kommandozeile öffnen, in das Verzeichnis mit dem Maven-Projekt wechseln und dort `mvn appengine:run`
+   ausführen.
+3. Lokalen Datastore durchsuchen: http://localhost:8080/_ah/admin
+4. Beispiele für Get-Requests:
+   `http://localhost:8080/items` listet alle Gegenstände als JSON (ohne Bildinhalt).
+   `http://localhost:8080/items?ownerId=tgantenbein&description=gelb` listet alle
+   Gegenstände, die unter tgantenbein erfasst sind und "gelb" in der Beschreibung enthalten.
+   `http://localhost:8080/items/1234` liefert den Gegenstand mit ID 1234 -- falls vorhanden.
+   
+## Auf Google Appengine deployen
+Um den Service auf Google Appengine zu betreiben, alle Installationen gemäss dem Absatz
+oben durchführen, eine Kommandozeile öffnen, in das Verzeichnis mit dem Maven-Projek wechseln
+und mvn `appengine:deploy` ausführen.
+
+## Limitierungen
+* Der REST-Service kann von jedem ohne Anmeldung benutzt werden.
+* Fehlerhandling ist nicht implementiert.
+* Auch die Bilder werden direkt in den DataStore geschrieben statt auf ein Filesystem.
 
