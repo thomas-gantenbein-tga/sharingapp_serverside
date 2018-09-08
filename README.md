@@ -21,10 +21,10 @@ Um den Rest-Service lokal (localhost:8080) laufen zu lassen:
    ausführen.
 3. Lokalen Datastore durchsuchen: http://localhost:8080/_ah/admin
 4. Beispiele für Get-Requests:
-   `http://localhost:8080/items` listet alle Gegenstände als JSON (ohne Bildinhalt).
-   `http://localhost:8080/items?ownerId=tgantenbein&description=gelb` listet alle
-   Gegenstände, die unter tgantenbein erfasst sind und "gelb" in der Beschreibung enthalten.
-   `http://localhost:8080/items/1234` liefert den Gegenstand mit ID 1234 -- falls vorhanden.
+  * `http://localhost:8080/items` listet alle Gegenstände als JSON (ohne Bildinhalt).
+  * `http://localhost:8080/items?ownerId=tgantenbein&description=gelb` listet alle
+     Gegenstände, die unter tgantenbein erfasst sind und "gelb" in der Beschreibung enthalten.
+  * `http://localhost:8080/items/1234` liefert den Gegenstand mit ID 1234 -- falls vorhanden.
    
 ## Auf Google Appengine deployen
 Um den Service auf Google Appengine zu betreiben, alle Installationen gemäss dem Absatz
