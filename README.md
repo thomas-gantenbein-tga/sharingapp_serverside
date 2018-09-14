@@ -9,7 +9,7 @@ Maven-Setup übernommen von einem [Google-Beispielprojekt](https://github.com/Go
 
 ## Features
 * Ressourcen können mit dem REST-Service 
-  * erstellt
+  * erstellt,
   * durchsucht, 
   * geholt und 
   * gelöscht werden.
